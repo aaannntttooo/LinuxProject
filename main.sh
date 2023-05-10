@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-
+echo "test"
 
 mkdir /home/shared
 
