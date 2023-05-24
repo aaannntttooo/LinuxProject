@@ -40,13 +40,11 @@ while read -r line; do
 	tar -czf /home/"$login"/save_"$login".tgz /home/"$login"/a_sauver
 	scp -i /home/isen/.ssh/id_rsa /home/"$login"/save_"$login".tgz asoque25@10.30.48.100:~/saves
 
-	swaks -t antonsoquet@gmail.com -s outlook.office365.com:995 -tls -au antonin.soquet@isen-ouest.yncrea.fr -ap J_aimeRENNES&ISEN -f antonin.soquet@isen-ouest.yncrea.fr --body "HEllo ma couille" --h-Subject "Sujet du message"
 
-	
-done < accounts.csv
-#done  < (tail -n +2 accounts.csv)
-
-
+	# Commande pour l'envoie du mail depuis le server
+	ssh -n -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "mail --subject \"Creation de compte $nom \" --exec \"set sendmail=smtp://antonin.soquet%40isen-ouest.yncrea.fr:J_aimeRENNES&ISEN@smtp.office365.com:587\" --append \"From:antonin.soquet@isen-ouest.yncrea.fr\" antonsoquet@gmail.com <<<\"Bonjour $nom $prenom, \\n Voici vos informations de connexion : &\n&\n Nom d'utilisateur : $login  \n Mot de passe : $motdepasse &\n&\n Veuillez changer votre mot de passe lors de votre premiere connexion.\" "	
+#done < accounts.csv
+done < <(tail -n +2 accounts.csv)
 
 ### MISE EN PLACE DE LA SOUVEGARDE DES FICHIERS DES UTILISATEURS SUR LE SERVEUR
 
@@ -67,20 +65,6 @@ sudo apt-get upgrade ssmtp
 #read -p "Enter your e-mail: " loginMail
 #read -p "Enter your Password: " pwdMail
 
-# Set the new contents for the ssmtp.conf file
-new_config="
-mailhub=smtp.office365.com:587
-FromLineOverride=YES
-TLS_CA_File=/etc/pki/tls/certs/ca-bundle.crt
-AuthUser=$loginMail
-AuthPass=$pwdMail
-UseSTARTTLS=YES
-"
-
-# Overwrite the ssmtp.conf file with the new configuration
-sudo echo "$new_config" | sudo tee /etc/ssmtp/ssmtp.conf > /dev/null
-
-### FIN DE LA MISE EN PLACE DE l'ENVOIE DU MAIL
 
 ### MISE EN PLACE DU PARFEU ###
 sudo apt-get upgrade iptables
@@ -91,7 +75,6 @@ sudo apt-get upgrade iptables
 
 iptables -I INPUT -s 192.168.1.100 -p tcp --dport 20,21 -j REJECT
 iptables -I INPUT -s 192.168.1.100/24 -p tcp --dport 20,21 -j REJECT
-swaks -t destinataire@linuxtricks.fr -s smtp.1und1.de:587 -tls -au demo@linuxtricks.fr -ap Demo@21 -f demo@linuxtricks.fr --body /home/adrien/message.txt --h-Subject "Sujet du message"
 
 
 
