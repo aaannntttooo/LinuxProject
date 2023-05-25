@@ -68,6 +68,7 @@ crontab -u isen $file
 rm "$file"
 ### FIN DE LA SOUVEGARDE DES FICHIERS UTILISATEURS 
 
+###MINITORING
 
 
 
@@ -88,18 +89,18 @@ rm "$file"
 sudo apt-get upgrade iptables
 
 
-#sudo iptables -A INPUT -p tcp --dport 21 -j DROP
-#sudo iptables -A OUTPUT -p tcp --sport 21 -j DROP
+sudo iptable-legacy -t filter -A INPUT -p tcp --dport 20 -j DROP
+sudo iptable-legacy -t filter -A INPUT -p tcp --dport 21 -j DROP
+sudo iptable-legacy -t filter -A INPUT -p udp -j DROP
 
-iptables -I INPUT -s 192.168.1.100 -p tcp --dport 20,21 -j REJECT
-iptables -I INPUT -s 192.168.1.100/24 -p tcp --dport 20,21 -j REJECT
+sudo iptable-legacy -t filter -A OUTPUT -p tcp --dport 20 -j DROP
+sudo iptable-legacy -t filter -A OUTPUT -p tcp --dport 21 -j DROP
+sudo iptable-legacy -t filter -A OUTPUT -p udp -j DROP
 
+sudo iptable-legacy -t filter -A FORWARD -p tcp --dport 20 -j DROP
+sudo iptable-legacy -t filter -A FORWARD -p tcp --dport 21 -j DROP
+sudo iptable-legacy -t filter -A FORWARD -p udp -j DROP
 
-
-sudo iptables -A INPUT -p udp -j DROP
-sudo iptables -A OUTPUT -p udp -j DROP
-
-service iptables save
 ### FIN DE MISE EN PLACE DU PARFEU
 
 #sudo iptables-save > /etc/iptables/rules.v4
