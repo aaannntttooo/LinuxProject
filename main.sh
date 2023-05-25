@@ -1,5 +1,11 @@
 #!/bin/bash
 
+MAIL_SERVER=$1
+MAIL_LOGIN=$2
+MAIL_PWD=$3 
+MAIL_LOGINSED=$(echo "$MAIL_LOGIN" | sed 's/@/%40/g')
+
+
 
 mkdir /home/shared
 
@@ -42,8 +48,18 @@ while read -r line; do
 
 
 	# Commande pour l'envoie du mail depuis le server
-	ssh -n -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "mail --subject \"Creation de compte $nom \" --exec \"set sendmail=smtp://antonin.soquet%40isen-ouest.yncrea.fr:J_aimeRENNES&ISEN@smtp.office365.com:587\" --append \"From:antonin.soquet@isen-ouest.yncrea.fr\" antonsoquet@gmail.com <<<\"Bonjour $nom $prenom, \\n Voici vos informations de connexion : &\n&\n Nom d'utilisateur : $login  \n Mot de passe : $motdepasse &\n&\n Veuillez changer votre mot de passe lors de votre premiere connexion.\" "	
-#done < accounts.csv
+	TO="$mail"
+	SUBJECT="Creation de compte"
+	BODY="Bonjour $nom $prenom, 
+Voici vos informations de connexion : 
+Nom d'utilisateur : $login   
+Mot de passe :$motdepasse  
+Veuillez changer votre mot de passe lors de votre premiere connexion."
+#	
+        ssh -n -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "mail --subject \"$SUBJECT \" --exec \"set sendmail=smtp://$MAIL_LOGINSED:$MAIL_PWD@smtp.$MAIL_SERVER\" --append \"From:$MAIL_LOGIN\" antonsoquet@gmail.com <<<\"$BODY\" "
+
+
+
 done < <(tail -n +2 accounts.csv)
 
 ### MISE EN PLACE DE LA SOUVEGARDE DES FICHIERS DES UTILISATEURS SUR LE SERVEUR
@@ -56,14 +72,14 @@ done < <(tail -n +2 accounts.csv)
 
 ### FIN DE LA SOUVEGARDE DES FICHIERS UTILISATEURS 
 
+#INSTALLATION DE ECLIPSE
+#apt install wgetJ_aimeRENNES&ISEN
+#wget https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2021-09/R/eclipse-java-2021-09-R-linux-gtk-x86_64.tar.gz -O eclipse.tar.gz
+#tar -xf eclipse.tar.gz
+#mv eclipse /home
+#chmod 775 /home/eclipse
+#rm eclipse.tar.gz
 
-### MISE EN PLACE DE L'ENVOIE DU MAIL
-
-sudo apt-get upgrade ssmtp
-
-
-#read -p "Enter your e-mail: " loginMail
-#read -p "Enter your Password: " pwdMail
 
 
 ### MISE EN PLACE DU PARFEU ###
