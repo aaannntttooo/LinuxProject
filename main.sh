@@ -8,17 +8,6 @@ MAIL_LOGINSED=$(echo "$MAIL_LOGIN" | sed 's/@/%40/g')
 
 mkdir /home/shared
 
-### TELECHARGEMENT D'ECLIPSE ET MISE EN SERVICE
-#apt get install wget
-# wget -O eclipse.tar.gz <https://www.eclipse.org/downloads/download.php?file=/oomph/epp/2023-03/R/eclipse-inst-jre-win64.exe>
-#sudo tar -xf eclipse.tar.gz -C /opt/
-
-# Set permissions#
-sudo chown -R root:root /opt/eclipse
-sudo chmod -R +r /opt/eclipse
-
-sudo chmod +x /usr/share/applications/eclipse.desktop
-
 
 ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "mkdir saves"
 
@@ -60,22 +49,31 @@ Veuillez changer votre mot de passe lors de votre premiere connexion."
         ssh -n -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "mail --subject \"$SUBJECT \" --exec \"set sendmail=smtp://$MAIL_LOGINSED:$MAIL_PWD@smtp.$MAIL_SERVER\" --append \"From:$MAIL_LOGIN\" \"$mail\" <<<\"$BODY\" "
 
 
-
 done < <(tail -n +2 accounts.csv)
 
 
 crontab -u isen $file
 rm "$file"
-### FIN DE LA SOUVEGARDE DES FICHIERS UTILISATEURS 
-
-###MINITORING
 
 
+###DEBUT DU MONITORING
+	file="tamponCron.txt"
+	ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "touch $file"
+	ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "crontab -u isen -l > $file"
+	ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "touch ressources.log"
+        CPU_LOAD=$(ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "top -bn1 | grep \"Cpu(s)\" | awk \'{print $2 + $4}\'")
+	MEMORY_LOAD=$(ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "free | awk \'/Mem/ {print $3/$2 * 100}\'")
+	current_date=$(date +"%Y-%m-%d")
+	current_time=$(date +"%H:%M:%S")
+#	ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100
+	line="0 23 * * 1-5 echo \"$current_date $current_time CPU\: $CPU_LOAD%  Memory\: $MEMORY_LOAD%\" >> ressources.log "
+	ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "crontab -u $file"
+        ssh -i /home/isen/.ssh/id_rsa asoque25@10.30.48.100 "rm $file"
+
+echo "Fin monitoring"
 
 
-
-
-#INSTALLATION DE ECLIPSE
+#INSTALLATION D' ECLIPSE
 #apt install wget
 #wget https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2021-09/R/eclipse-java-2021-09-R-linux-gtk-x86_64.tar.gz -O eclipse.tar.gz
 #tar -xf eclipse.tar.gz
@@ -85,23 +83,20 @@ rm "$file"
 
 
 
-### MISE EN PLACE DU PARFEU ###
-sudo apt-get upgrade iptables
 
+#sudo apt-get upgrade iptables
 
-sudo iptable-legacy -t filter -A INPUT -p tcp --dport 20 -j DROP
-sudo iptable-legacy -t filter -A INPUT -p tcp --dport 21 -j DROP
-sudo iptable-legacy -t filter -A INPUT -p udp -j DROP
+iptables-legacy -t filter -A INPUT -p tcp --dport 20 -j DROP
+iptables-legacy -t filter -A INPUT -p tcp --dport 21 -j DROP
+iptables-legacy -t filter -A INPUT -p udp -j DROP
 
-sudo iptable-legacy -t filter -A OUTPUT -p tcp --dport 20 -j DROP
-sudo iptable-legacy -t filter -A OUTPUT -p tcp --dport 21 -j DROP
-sudo iptable-legacy -t filter -A OUTPUT -p udp -j DROP
+sudo iptables-legacy -t filter -A OUTPUT -p tcp --dport 20 -j DROP
+sudo iptables-legacy -t filter -A OUTPUT -p tcp --dport 21 -j DROP
+sudo iptables-legacy -t filter -A OUTPUT -p udp -j DROP
 
-sudo iptable-legacy -t filter -A FORWARD -p tcp --dport 20 -j DROP
-sudo iptable-legacy -t filter -A FORWARD -p tcp --dport 21 -j DROP
-sudo iptable-legacy -t filter -A FORWARD -p udp -j DROP
+sudo iptables-legacy -t filter -A FORWARD -p tcp --dport 20 -j DROP
+sudo iptables-legacy -t filter -A FORWARD -p tcp --dport 21 -j DROP
+sudo iptables-legacy -t filter -A FORWARD -p udp -j DROP
 
 ### FIN DE MISE EN PLACE DU PARFEU
-
-#sudo iptables-save > /etc/iptables/rules.v4
 
